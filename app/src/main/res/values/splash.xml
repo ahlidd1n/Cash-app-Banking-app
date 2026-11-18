@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="App.Starting.Theme" parent="Theme.CashApp">
+        <item name="android:windowSplashScreenBackground">#00D632</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/cash_app_icon</item>
+    </style>
+</resources>
