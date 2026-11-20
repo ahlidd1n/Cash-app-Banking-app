@@ -20,15 +20,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import coil3.compose.AsyncImage
 import com.example.cashapp.data.OnBoardingData
 import com.example.cashapp.screens.registration.CreateAccountScreen
+import com.example.cashapp.viewmodel.OnBoardingViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun OnboardingScreen(
-    onFinished: () -> Unit
+    onFinished: () -> Unit,
+    viewModel: OnBoardingViewModel
 ) {
 
     val pages = listOf(
@@ -78,7 +82,10 @@ fun OnboardingScreen(
         ) {
 
             TextButton(
-                onClick = onFinished
+                onClick = {
+                    viewModel.onBoardingFinish()
+                    onFinished()
+                }
             ) {
                 Text(
                     text = "Skip",
@@ -185,6 +192,7 @@ fun OnboardingScreen(
                     }
 
                 } else{
+                    viewModel.onBoardingFinish()
                     onFinished()
                 }
             },

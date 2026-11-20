@@ -42,23 +42,22 @@ val PlaceholderWhite = Color.White.copy(alpha = 0.85f)
 
 @Composable
 fun CreateAccountScreen(
-    onSignUpClick: (String, String, String, String) -> Unit = { _, _, _, _ -> },
     onLogInClick: () -> Unit = {},
-    onTermsClick: () -> Unit = {}
+    onTermsClick: () -> Unit = {},
+    onFinish: () -> Unit = {}
 ) {
     var fullName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
-    var isTermsAccepted by remember { mutableStateOf(true) }
+    var isTermsAccepted by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(CashAppGreen)
     ) {
-        // Декоративный полупрозрачный круг в правом верхнем углу
         Box(
             modifier = Modifier
                 .size(260.dp)
@@ -77,7 +76,6 @@ fun CreateAccountScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Верхняя часть: заголовки и форма
             Column {
                 Spacer(modifier = Modifier.height(20.dp))
 
@@ -111,7 +109,6 @@ fun CreateAccountScreen(
 
                 Spacer(modifier = Modifier.height(28.dp))
 
-                // Поля ввода
                 CashAppTextField(
                     value = fullName,
                     onValueChange = { fullName = it },
@@ -150,12 +147,10 @@ fun CreateAccountScreen(
 
                 Spacer(modifier = Modifier.height(18.dp))
 
-                // Чекбокс и Terms of Service
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.padding(start = 4.dp)
                 ) {
-                    // Кастомный белый скругленный чекбокс как на макете
                     Box(
                         modifier = Modifier
                             .size(22.dp)
@@ -211,7 +206,6 @@ fun CreateAccountScreen(
                 }
             }
 
-            // Нижняя часть: кнопка Sign Up и ссылка Log In
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
@@ -219,7 +213,7 @@ fun CreateAccountScreen(
                     .padding(top = 32.dp, bottom = 20.dp)
             ) {
                 Button(
-                    onClick = { onSignUpClick(fullName, email, phoneNumber, password) },
+                    onClick = { onFinish()},
                     enabled = isTermsAccepted,
                     shape = RoundedCornerShape(50),
                     colors = ButtonDefaults.buttonColors(

@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun LoginScreen(
-    onLogInClick: (String, String) -> Unit = { _, _ -> },
+    onLogInClick: () -> Unit = {},
     onForgotPasswordClick: () -> Unit = {},
     onSignUpClick: () -> Unit = {}
 ) {
@@ -40,7 +40,6 @@ fun LoginScreen(
             .fillMaxSize()
             .background(CashAppGreen)
     ) {
-        // Декоративный полупрозрачный круг в правом верхнем углу
         Box(
             modifier = Modifier
                 .size(260.dp)
@@ -59,7 +58,6 @@ fun LoginScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Верхняя часть: заголовки
             Column {
                 Spacer(modifier = Modifier.height(20.dp))
 
@@ -92,7 +90,6 @@ fun LoginScreen(
                 )
             }
 
-            // Центральная часть: поля ввода и ссылка "Forgot Password?"
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -119,7 +116,6 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                // Ссылка Forgot Password? выровнена по правому краю
                 Box(
                     modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.CenterEnd
@@ -137,7 +133,6 @@ fun LoginScreen(
                 }
             }
 
-            // Нижняя часть: кнопка Log In и ссылка Sign Up
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
@@ -145,7 +140,7 @@ fun LoginScreen(
                     .padding(bottom = 20.dp)
             ) {
                 Button(
-                    onClick = { onLogInClick(emailOrPhone, password) },
+                    onClick = { onLogInClick() },
                     shape = RoundedCornerShape(50),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.White,
