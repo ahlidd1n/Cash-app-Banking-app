@@ -1,10 +1,14 @@
 package com.example.cashapp.navigation
 
 import android.content.Context
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -20,6 +24,8 @@ import com.example.cashapp.screens.registration.CreateAccountScreen
 import com.example.cashapp.screens.registration.LoginScreen
 import com.example.cashapp.viewmodel.OnBoardingViewModel
 import com.example.cashapp.viewmodel.OnBoardingViewModelFactory
+import com.example.cashapp.viewmodel.UiState
+import com.example.cashapp.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
@@ -38,6 +44,9 @@ fun AppNavGraph(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val repository = remember { UserRepository(context.applicationContext) }
+    val userViewModel: UserViewModel = viewModel()
+    val uiState by userViewModel.uiState.collectAsStateWithLifecycle()
+
     NavHost(
         navController = navController,
         startDestination = startDestination
@@ -74,28 +83,43 @@ fun AppNavGraph(
         }
 
         composable<SingIn> {
+
+            val errorMessage = (uiState as? UiState.Error)?.errorMassage
+
             LoginScreen(
+                errorMessage = errorMessage,
+
                 onSignUpClick = {
                     navController.navigate(SingUp)
                 },
-                onLogInClick = {
-                    scope.launch {
-                        repository.setRegistered(true)
-                        navController.navigate(route = Home) {
-                            popUpTo<SingUp> { inclusive = true }
-                        }
-                    }
+
+                onLogInClick = { email, password ->
+                    userViewModel.login(email, password)
                 }
             )
+
+            LaunchedEffect(uiState) {
+                if (uiState is UiState.Success) {
+                    navController.navigate(Home) {
+                        popUpTo<SingIn> {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                }
+            }
         }
+
 
         composable<Home> {
             HomeScreen(
+                viewModel = userViewModel,
                 navigation = {
                     navController.navigate(Home)
                 }
             )
         }
+
 
         composable<Cards> {
             MainCardScreen(

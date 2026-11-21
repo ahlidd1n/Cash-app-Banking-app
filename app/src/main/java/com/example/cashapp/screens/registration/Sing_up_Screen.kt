@@ -32,6 +32,10 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.cashapp.data.NewUser
+import com.example.cashapp.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
@@ -46,7 +50,8 @@ val PlaceholderWhite = Color.White.copy(alpha = 0.85f)
 fun CreateAccountScreen(
     onLogInClick: () -> Unit = {},
     onTermsClick: () -> Unit = {},
-    onFinish: () -> Unit = {}
+    onFinish: () -> Unit = {},
+    viewModel: UserViewModel = viewModel()
 ) {
     var fullName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -56,6 +61,7 @@ fun CreateAccountScreen(
     var isTermsAccepted by remember { mutableStateOf(false) }
     val snackBarHost = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val state = viewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
         snackbarHost = {
@@ -245,6 +251,13 @@ fun CreateAccountScreen(
                         Button(
                             onClick = {
                                 if (fullName.isNotBlank() && email.isNotBlank() && phoneNumber.isNotBlank() && password.isNotBlank()){
+                                    val newUser = NewUser(
+                                        fullName = fullName,
+                                        email = email,
+                                        phone = phoneNumber,
+                                        password = password
+                                    )
+                                    viewModel.saveUser(newUser)
                                     onFinish()
                                 }else if(!email.contains("@")){
                                     scope.launch {

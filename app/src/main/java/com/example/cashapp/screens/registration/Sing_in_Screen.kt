@@ -33,15 +33,16 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
-    onLogInClick: () -> Unit = {},
+    onLogInClick: (String, String) -> Unit,
     onForgotPasswordClick: () -> Unit = {},
-    onSignUpClick: () -> Unit = {}
+    onSignUpClick: () -> Unit = {},
+    errorMessage: String? = null
 ) {
+    val scope = rememberCoroutineScope()
     var emailOrPhone by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
     val snackBarHost = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
 
         Scaffold(
             snackbarHost = {
@@ -176,7 +177,7 @@ fun LoginScreen(
                         Button(
                             onClick = {
                                 if(emailOrPhone.isNotBlank() && password.isNotBlank()){
-                                    onLogInClick()
+                                    onLogInClick(emailOrPhone, password)
                                 }else{
                                     scope.launch {
                                         snackBarHost.showSnackbar(
@@ -241,8 +242,9 @@ fun LoginScreen(
             }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun LoginScreenPreview() {
-    LoginScreen()
-}
+//
+//@Preview(showBackground = true, showSystemUi = true)
+//@Composable
+//fun LoginScreenPreview() {
+//    LoginScreen(em)
+//}
