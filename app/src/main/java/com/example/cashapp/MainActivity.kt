@@ -31,13 +31,10 @@ class MainActivity : ComponentActivity() {
             CashAppTheme {
                 val navController = rememberNavController()
                 val repository = remember { UserRepository(applicationContext) }
-
                 val onBoardingState by repository.onBoardingFinished.collectAsState(initial = null)
                 val registeredState by repository.isRegistered.collectAsState(initial = null)
-
                 val finished = onBoardingState
                 val registered = registeredState
-
                 if (finished != null && registered != null) {
                     val navBackStackEntry by navController.currentBackStackEntryAsState()
                     val currentRoute = navBackStackEntry?.destination?.route

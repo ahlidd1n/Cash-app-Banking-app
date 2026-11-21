@@ -1,5 +1,6 @@
 package com.example.cashapp.screens.registration
 
+import android.R.attr.enabled
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -31,6 +32,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 // Цвета по макету
@@ -52,222 +54,272 @@ fun CreateAccountScreen(
     var password by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
     var isTermsAccepted by remember { mutableStateOf(false) }
+    val snackBarHost = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(CashAppGreen)
-    ) {
-        Box(
-            modifier = Modifier
-                .size(260.dp)
-                .align(Alignment.TopEnd)
-                .offset(x = 90.dp, y = (-70).dp)
-                .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.14f))
-        )
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .statusBarsPadding()
-                .navigationBarsPadding()
-                .padding(horizontal = 24.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column {
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Text(
-                    text = "GET STARTED",
-                    color = Color.White.copy(alpha = 0.85f),
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.5.sp
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = "Create\nAccount",
-                    color = Color.White,
-                    fontSize = 44.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    lineHeight = 48.sp
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Text(
-                    text = "Your money, your moves. Let’s set up your\naccount.",
-                    color = Color.White.copy(alpha = 0.9f),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                    lineHeight = 22.sp
-                )
-
-                Spacer(modifier = Modifier.height(28.dp))
-
-                CashAppTextField(
-                    value = fullName,
-                    onValueChange = { fullName = it },
-                    placeholder = "Full Name"
-                )
-
-                Spacer(modifier = Modifier.height(14.dp))
-
-                CashAppTextField(
-                    value = email,
-                    onValueChange = { email = it },
-                    placeholder = "Email",
-                    keyboardType = KeyboardType.Email
-                )
-
-                Spacer(modifier = Modifier.height(14.dp))
-
-                CashAppTextField(
-                    value = phoneNumber,
-                    onValueChange = { phoneNumber = it },
-                    placeholder = "Phone Number",
-                    keyboardType = KeyboardType.Phone
-                )
-
-                Spacer(modifier = Modifier.height(14.dp))
-
-                CashAppTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    placeholder = "Password",
-                    keyboardType = KeyboardType.Password,
-                    isPassword = true,
-                    isPasswordVisible = isPasswordVisible,
-                    onTogglePasswordVisibility = { isPasswordVisible = !isPasswordVisible }
-                )
-
-                Spacer(modifier = Modifier.height(18.dp))
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(start = 4.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(22.dp)
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(
-                                if (isTermsAccepted) Color.White else InputBackgroundWhite
-                            )
-                            .border(
-                                width = 1.dp,
-                                color = Color.White,
-                                shape = RoundedCornerShape(6.dp)
-                            )
-                            .clickable { isTermsAccepted = !isTermsAccepted },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (isTermsAccepted) {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = "Checked",
-                                tint = CashAppGreen,
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    val termsText = buildAnnotatedString {
-                        withStyle(
-                            style = SpanStyle(
-                                color = Color.White,
-                                fontWeight = FontWeight.Medium
-                            )
-                        ) {
-                            append("I agree to the ")
-                        }
-                        withStyle(
-                            style = SpanStyle(
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold,
-                                textDecoration = TextDecoration.Underline
-                            )
-                        ) {
-                            append("Terms of Service")
-                        }
-                    }
-
-                    Text(
-                        text = termsText,
-                        fontSize = 14.sp,
-                        modifier = Modifier.clickable { onTermsClick() }
-                    )
-                }
-            }
-
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 32.dp, bottom = 20.dp)
+    Scaffold(
+        snackbarHost = {
+            Box(
+                modifier = Modifier.fillMaxSize()
             ) {
-                Button(
-                    onClick = { onFinish()},
-                    enabled = isTermsAccepted,
-                    shape = RoundedCornerShape(50),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.White,
-                        contentColor = Color.Black,
-                        disabledContainerColor = Color.White.copy(alpha = 0.5f),
-                        disabledContentColor = Color.Black.copy(alpha = 0.5f)
-                    ),
+                SnackbarHost(
+                    hostState = snackBarHost,
                     modifier = Modifier
+                        .align(Alignment.TopCenter)
                         .fillMaxWidth()
-                        .height(60.dp)
-                ) {
-                    Text(
-                        text = "Sign Up",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)
+                        .statusBarsPadding()
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                ) { data ->
+                    Snackbar(
+                        snackbarData = data,
+                        containerColor = Color(0xFFE53935),
+                        contentColor = Color.White,
+                        shape = RoundedCornerShape(16.dp)
                     )
                 }
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                val loginText = buildAnnotatedString {
-                    withStyle(
-                        style = SpanStyle(
-                            color = Color.White,
-                            fontWeight = FontWeight.Medium
-                        )
-                    ) {
-                        append("Already have an account? ")
-                    }
-                    withStyle(
-                        style = SpanStyle(
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            textDecoration = TextDecoration.Underline
-                        )
-                    ) {
-                        append("Log In")
-                    }
-                }
-
-                Text(
-                    text = loginText,
-                    fontSize = 14.sp,
-                    modifier = Modifier.clickable { onLogInClick() }
-                )
             }
         }
+    ) {paddingValues ->
+        Column(
+            modifier = Modifier.padding(paddingValues)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(CashAppGreen)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(260.dp)
+                        .align(Alignment.TopEnd)
+                        .offset(x = 90.dp, y = (-70).dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.14f))
+                )
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .statusBarsPadding()
+                        .navigationBarsPadding()
+                        .padding(horizontal = 24.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column {
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        Text(
+                            text = "GET STARTED",
+                            color = Color.White.copy(alpha = 0.85f),
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.5.sp
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = "Create\nAccount",
+                            color = Color.White,
+                            fontSize = 44.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            lineHeight = 48.sp
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Text(
+                            text = "Your money, your moves. Let’s set up your\naccount.",
+                            color = Color.White.copy(alpha = 0.9f),
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium,
+                            lineHeight = 22.sp
+                        )
+
+                        Spacer(modifier = Modifier.height(28.dp))
+
+                        CashAppTextField(
+                            value = fullName,
+                            onValueChange = { fullName = it },
+                            placeholder = "Full Name"
+                        )
+
+                        Spacer(modifier = Modifier.height(14.dp))
+
+                        CashAppTextField(
+                            value = email,
+                            onValueChange = { email = it },
+                            placeholder = "Email",
+                            keyboardType = KeyboardType.Email
+                        )
+
+                        Spacer(modifier = Modifier.height(14.dp))
+
+                        CashAppTextField(
+                            value = phoneNumber,
+                            onValueChange = { phoneNumber = it },
+                            placeholder = "Phone Number",
+                            keyboardType = KeyboardType.Phone
+                        )
+
+                        Spacer(modifier = Modifier.height(14.dp))
+
+                        CashAppTextField(
+                            value = password,
+                            onValueChange = { password = it },
+                            placeholder = "Password",
+                            keyboardType = KeyboardType.Password,
+                            isPassword = true,
+                            isPasswordVisible = isPasswordVisible,
+                            onTogglePasswordVisibility = { isPasswordVisible = !isPasswordVisible }
+                        )
+
+                        Spacer(modifier = Modifier.height(18.dp))
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(start = 4.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(22.dp)
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(
+                                        if (isTermsAccepted) Color.White else InputBackgroundWhite
+                                    )
+                                    .border(
+                                        width = 1.dp,
+                                        color = Color.White,
+                                        shape = RoundedCornerShape(6.dp)
+                                    )
+                                    .clickable { isTermsAccepted = !isTermsAccepted },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (isTermsAccepted) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = "Checked",
+                                        tint = CashAppGreen,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            val termsText = buildAnnotatedString {
+                                withStyle(
+                                    style = SpanStyle(
+                                        color = Color.White,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                ) {
+                                    append("I agree to the ")
+                                }
+                                withStyle(
+                                    style = SpanStyle(
+                                        color = Color.White,
+                                        fontWeight = FontWeight.Bold,
+                                        textDecoration = TextDecoration.Underline
+                                    )
+                                ) {
+                                    append("Terms of Service")
+                                }
+                            }
+
+                            Text(
+                                text = termsText,
+                                fontSize = 14.sp,
+                                modifier = Modifier.clickable { onTermsClick() }
+                            )
+                        }
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 32.dp, bottom = 20.dp)
+                    ) {
+                        Button(
+                            onClick = {
+                                if (fullName.isNotBlank() && email.isNotBlank() && phoneNumber.isNotBlank() && password.isNotBlank()){
+                                    onFinish()
+                                }else if(!email.contains("@")){
+                                    scope.launch {
+                                        snackBarHost.showSnackbar(
+                                            "Invalid Email !"
+                                        )
+                                    }
+                                }else if (phoneNumber.length != 9) {
+                                    scope.launch {
+                                        snackBarHost.showSnackbar("Phone number must contain 9 digits!")
+                                    }
+                                } else{
+                                    scope.launch {
+                                        snackBarHost.showSnackbar(
+                                            "Please fill in all the fields !"
+                                        )
+                                    }
+                                }
+                            },
+                            enabled = isTermsAccepted,
+                            shape = RoundedCornerShape(50),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.White,
+                                contentColor = Color.Black,
+                                disabledContainerColor = Color.White.copy(alpha = 0.5f),
+                                disabledContentColor = Color.Black.copy(alpha = 0.5f)
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(60.dp)
+                        ) {
+                            Text(
+                                text = "Sign Up",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        val loginText = buildAnnotatedString {
+                            withStyle(
+                                style = SpanStyle(
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            ) {
+                                append("Already have an account? ")
+                            }
+                            withStyle(
+                                style = SpanStyle(
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold,
+                                    textDecoration = TextDecoration.Underline
+                                )
+                            ) {
+                                append("Log In")
+                            }
+                        }
+
+                        Text(
+                            text = loginText,
+                            fontSize = 14.sp,
+                            modifier = Modifier.clickable { onLogInClick() }
+                        )
+                    }
+                }
+        }
+    }
     }
 }
 
