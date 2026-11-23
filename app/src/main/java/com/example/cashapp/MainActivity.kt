@@ -38,12 +38,13 @@ class MainActivity : ComponentActivity() {
                 if (finished != null && registered != null) {
                     val navBackStackEntry by navController.currentBackStackEntryAsState()
                     val currentRoute = navBackStackEntry?.destination?.route
+
                     val showBottomBar = currentRoute?.let { route ->
-                        route.endsWith("Home") ||
-                                route.endsWith("Cards") ||
-                                route.endsWith("Pay") ||
-                                route.endsWith("Search") ||
-                                route.endsWith("History")
+                        route.contains("Home") ||
+                                route.contains("Cards") ||
+                                route.contains("Pay") ||
+                                route.contains("Search") ||
+                                route.contains("History")
                     } ?: false
 
                     Scaffold(

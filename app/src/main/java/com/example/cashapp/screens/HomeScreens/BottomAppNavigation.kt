@@ -14,7 +14,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.cashapp.R
 import com.example.cashapp.navigation.Cards
 import com.example.cashapp.navigation.History
-import com.example.cashapp.navigation.Home
+import com.example.cashapp.navigation.Homes
 import com.example.cashapp.navigation.Pay
 import com.example.cashapp.navigation.Search
 
@@ -29,7 +29,7 @@ val BottomNavigationList = listOf(
     BottomNavigationData(
         title = "Home",
         icon = R.drawable.homeicon,
-        navigation = Home
+        navigation = Homes
     ),
     BottomNavigationData(
         title = "Cards",

@@ -1,6 +1,8 @@
 package com.example.cashapp.screens.HomeScreens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
@@ -10,6 +12,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cashapp.viewmodel.UiState
@@ -34,15 +37,27 @@ fun HomeScreen(
                     CircularProgressIndicator()
             }
 
-            is UiState.Success -> {
-                Text("Welcome, ${user.userInfo.fullName}")
-                Text("Email: ${user.userInfo.email}")
-                Text("Phone: ${user.userInfo.phone}")
-            }
-
             is UiState.Error -> {
                 Text("Error: ${user.errorMassage}")
             }
+
+            is UiState.Success -> {
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(color = Color.Blue)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                    ) { }
+                }
+
+            }
+
+
         }
+
     }
 }

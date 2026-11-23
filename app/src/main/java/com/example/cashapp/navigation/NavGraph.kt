@@ -1,19 +1,12 @@
 package com.example.cashapp.navigation
 
-import android.content.Context
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.cashapp.repository.UserRepository
 import com.example.cashapp.screens.CardScreens.MainCardScreen
 import com.example.cashapp.screens.HistoryScreens.MainHistoryScreen
 import com.example.cashapp.screens.HomeScreens.HomeScreen
@@ -22,12 +15,17 @@ import com.example.cashapp.screens.SearchScreens.MainSearchScreen
 import com.example.cashapp.screens.onboarding.OnboardingScreen
 import com.example.cashapp.screens.registration.CreateAccountScreen
 import com.example.cashapp.screens.registration.LoginScreen
+import kotlinx.serialization.Serializable
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.input.key.Key.Companion.Home
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavHostController
+import com.example.cashapp.repository.UserRepository
 import com.example.cashapp.viewmodel.OnBoardingViewModel
 import com.example.cashapp.viewmodel.OnBoardingViewModelFactory
-import com.example.cashapp.viewmodel.UiState
 import com.example.cashapp.viewmodel.UserViewModel
-import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
 
 @Composable
 fun AppNavGraph(
@@ -35,26 +33,35 @@ fun AppNavGraph(
     isOnBoardingFinished: Boolean,
     isRegistered: Boolean
 ) {
+    val context = LocalContext.current
+    val userRepository = remember { UserRepository(context.applicationContext) }
+    val isLogin by userRepository.isLogin.collectAsStateWithLifecycle(initialValue = null)
+
+    val loggedIn = isLogin ?: return
+
     val startDestination: Any = when {
-        isRegistered -> Home
+        loggedIn -> Homes
+        isRegistered -> SingIn
         isOnBoardingFinished -> SingUp
         else -> OnBoardingRout
     }
 
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val repository = remember { UserRepository(context.applicationContext) }
-    val userViewModel: UserViewModel = viewModel()
-    val uiState by userViewModel.uiState.collectAsStateWithLifecycle()
+    val userViewModel: UserViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return UserViewModel(userRepository) as T
+            }
+        }
+    )
 
     NavHost(
         navController = navController,
         startDestination = startDestination
     ) {
         composable<OnBoardingRout> {
-            val context: Context = LocalContext.current
             val onBoardingViewModel: OnBoardingViewModel = viewModel(
-                factory = OnBoardingViewModelFactory(UserRepository(context.applicationContext))
+                factory = OnBoardingViewModelFactory(userRepository)
             )
             OnboardingScreen(
                 viewModel = onBoardingViewModel,
@@ -68,89 +75,54 @@ fun AppNavGraph(
 
         composable<SingUp> {
             CreateAccountScreen(
-                onLogInClick = {
-                    navController.navigate(SingIn)
-                },
-                onFinish = {
-                    scope.launch {
-                        repository.setRegistered(true)
-                        navController.navigate(route = Home) {
-                            popUpTo<SingUp> { inclusive = true }
-                        }
+                viewModel = userViewModel,
+                onLogInClick = { navController.navigate(route = SingIn) },
+                onAccountCreated = {
+                    navController.navigate(route = SingIn) {
+                        popUpTo<SingUp> { inclusive = true }
                     }
                 }
             )
         }
 
         composable<SingIn> {
-
-            val errorMessage = (uiState as? UiState.Error)?.errorMassage
-
             LoginScreen(
-                errorMessage = errorMessage,
-
-                onSignUpClick = {
-                    navController.navigate(SingUp)
-                },
-
-                onLogInClick = { email, password ->
-                    userViewModel.login(email, password)
-                }
-            )
-
-            LaunchedEffect(uiState) {
-                if (uiState is UiState.Success) {
-                    navController.navigate(Home) {
-                        popUpTo<SingIn> {
-                            inclusive = true
-                        }
-                        launchSingleTop = true
+                viewModel = userViewModel,
+                onSignUpClick = { navController.navigate(SingUp) },
+                onLogInSuccess = {
+                    navController.navigate(Homes) {
+                        popUpTo(0) { inclusive = true }
                     }
                 }
-            }
+            )
         }
 
-
-        composable<Home> {
+        composable<Homes> {
+            LaunchedEffect(Unit) {
+                userViewModel.loadCurrentUser()
+            }
             HomeScreen(
                 viewModel = userViewModel,
                 navigation = {
-                    navController.navigate(Home)
+                    navController.navigate(Homes)
                 }
             )
         }
 
-
         composable<Cards> {
-            MainCardScreen(
-                navigation = {
-                    navController.navigate(Cards)
-                }
-            )
+            MainCardScreen(navigation = { navController.navigate(Cards) })
         }
 
         composable<Pay> {
-            MainPayScreen(
-                navigation = {
-                    navController.navigate(Pay)
-                }
-            )
+            MainPayScreen(navigation = { navController.navigate(Pay) })
         }
 
         composable<Search> {
-            MainSearchScreen(
-                navigation = {
-                    navController.navigate(Search)
-                }
-            )
+            MainSearchScreen(navigation = { navController.navigate(Search) })
         }
 
         composable<History> {
-            MainHistoryScreen(
-                navigation = {
-                    navController.navigate(History)
-                }
-            )
+            MainHistoryScreen(navigation = { navController.navigate(History) })
         }
     }
 }
@@ -165,7 +137,7 @@ object SingUp
 object SingIn
 
 @Serializable
-object Home
+object Homes
 
 @Serializable
 object Cards
