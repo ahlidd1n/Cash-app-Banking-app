@@ -1,13 +1,17 @@
 package com.example.cashapp.screens.HomeScreens
 
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -56,10 +60,14 @@ val BottomNavigationList = listOf(
 
 @Composable
 fun BottomNavigation(navController: NavHostController) {
-    NavigationBar {
+    NavigationBar(
+        containerColor = Color.White,
+        modifier = Modifier
+            .clip(shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+    ) {
+
 
         val navBackStackEntry by navController.currentBackStackEntryAsState()
-
         val currentDestination = navBackStackEntry?.destination
         BottomNavigationList.forEach { screen ->
 

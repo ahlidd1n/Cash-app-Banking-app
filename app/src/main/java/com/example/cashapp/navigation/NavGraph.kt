@@ -23,6 +23,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import com.example.cashapp.repository.UserRepository
+import com.example.cashapp.screens.HomeScreens.AddCash
 import com.example.cashapp.viewmodel.OnBoardingViewModel
 import com.example.cashapp.viewmodel.OnBoardingViewModelFactory
 import com.example.cashapp.viewmodel.UserViewModel
@@ -105,8 +106,15 @@ fun AppNavGraph(
                 viewModel = userViewModel,
                 navigation = {
                     navController.navigate(Homes)
+                },
+                navigateToAddCashScreen = {
+                    navController.navigate(AddCashScreen)
                 }
             )
+        }
+
+        composable <AddCashScreen>{
+            AddCash()
         }
 
         composable<Cards> {
@@ -150,3 +158,5 @@ object Search
 
 @Serializable
 object History
+@Serializable
+object AddCashScreen
