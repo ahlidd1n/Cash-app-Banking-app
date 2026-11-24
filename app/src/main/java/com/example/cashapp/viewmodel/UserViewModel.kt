@@ -95,6 +95,58 @@ class UserViewModel(
         }
     }
 
+
+    fun addBalance(amount: Double) {
+        if (amount <= 0.0) return
+        val currentState = _uiState.value
+        if (currentState is UiState.Success) {
+            val currentUser = currentState.userInfo
+            val updatedUser = currentUser.copy(
+                balance = currentUser.balance + amount
+            )
+
+            viewModelScope.launch {
+                try {
+                    val savedUser = RetrofitClient.api.updateUser(
+                        id = currentUser.id,
+                        user = updatedUser
+                    )
+                    _uiState.value = UiState.Success(savedUser)
+                } catch (e: Exception) {
+                    _uiState.value = UiState.Error(e.message ?: "Failed to update balance!")
+                }
+            }
+        }
+    }
+
+    fun moveToSavings(amount: Double) {
+        if (amount <= 0.0) return
+        val currentState = _uiState.value
+        if (currentState is UiState.Success) {
+            val currentUser = currentState.userInfo
+            if (amount > currentUser.balance) return
+
+            val updatedUser = currentUser.copy(
+                balance = currentUser.balance - amount,
+                savings = currentUser.savings + amount
+            )
+
+            _uiState.value = UiState.Success(updatedUser)
+
+            viewModelScope.launch {
+                try {
+                    val savedUser = RetrofitClient.api.updateUser(
+                        id = currentUser.id,
+                        user = updatedUser
+                    )
+                    _uiState.value = UiState.Success(savedUser)
+                } catch (e: Exception) {
+                    _uiState.value = UiState.Error("Failed")
+                }
+            }
+        }
+    }
+
     fun logout() {
         viewModelScope.launch {
             userRepository.setLogin(false)

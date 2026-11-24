@@ -24,6 +24,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import com.example.cashapp.repository.UserRepository
 import com.example.cashapp.screens.HomeScreens.AddCash
+import com.example.cashapp.screens.SavingsScreen.SavingsScreen
 import com.example.cashapp.viewmodel.OnBoardingViewModel
 import com.example.cashapp.viewmodel.OnBoardingViewModelFactory
 import com.example.cashapp.viewmodel.UserViewModel
@@ -109,13 +110,30 @@ fun AppNavGraph(
                 },
                 navigateToAddCashScreen = {
                     navController.navigate(AddCashScreen)
+                },
+                navigateToSavingScreen = {
+                    navController.navigate(SavingScreen)
                 }
+            )
+        }
+
+
+
+        composable<SavingScreen> {
+            SavingsScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                viewModel = userViewModel
             )
         }
 
         composable <AddCashScreen>{
             AddCash()
         }
+
+
+
 
         composable<Cards> {
             MainCardScreen(navigation = { navController.navigate(Cards) })
@@ -160,3 +178,5 @@ object Search
 object History
 @Serializable
 object AddCashScreen
+@Serializable
+object SavingScreen

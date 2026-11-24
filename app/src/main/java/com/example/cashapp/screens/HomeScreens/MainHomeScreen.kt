@@ -1,8 +1,6 @@
 package com.example.cashapp.screens.HomeScreens
 
-import android.R
-import android.R.attr.fontWeight
-import android.R.attr.top
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -63,7 +61,8 @@ import java.nio.file.WatchEvent
 fun HomeScreen(
     navigation: () -> Unit = {},
     viewModel: UserViewModel = viewModel(),
-    navigateToAddCashScreen: () -> Unit = {}
+    navigateToAddCashScreen: () -> Unit = {},
+    navigateToSavingScreen: () -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsState()
     var bottomSheet by remember{ mutableStateOf(false) }
@@ -226,7 +225,7 @@ fun HomeScreen(
 
                                         val numbers = listOf("$1", "$10", "$20", "$50", "$100", "...")
                                         var selectedNumber by remember { mutableStateOf<String?>(null) }
-                                        var addCash by rememberSaveable { mutableStateOf(0) }
+                                        var addCash by rememberSaveable { mutableStateOf(0.00) }
 
 
                                         Column(
@@ -265,7 +264,7 @@ fun HomeScreen(
                                                                     selectedNumber = number
                                                                     addCash =
                                                                         number.removePrefix("$")
-                                                                            .toInt()
+                                                                            .toDouble()
                                                                 }
                                                             },
                                                         contentAlignment = Alignment.Center
@@ -284,10 +283,14 @@ fun HomeScreen(
 
                                             Button(
                                                 onClick = {
-                                                    if (addCash == 0){
+                                                    if (addCash == 0.00){
                                                         scope.launch {
                                                             snackBar.showSnackbar(message = "Select some amount !")
                                                         }
+                                                    }else{
+                                                        viewModel.addBalance(addCash)
+                                                        addCash = 0.00
+                                                        bottomSheet = false
                                                     }
                                                 },
                                                 modifier = Modifier
@@ -326,7 +329,7 @@ fun HomeScreen(
                                         modifier = Modifier
                                             .width(160.dp)
                                             .height(195.dp)
-                                            .clickable(onClick = {})
+                                            .clickable(onClick = navigateToSavingScreen)
                                             .background(
                                                 color = Color.White,
                                                 shape = RoundedCornerShape(16.dp)

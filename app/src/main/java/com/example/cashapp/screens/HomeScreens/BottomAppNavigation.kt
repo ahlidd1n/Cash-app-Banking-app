@@ -29,35 +29,6 @@ data class BottomNavigationData(
     val selected: Boolean = false
 )
 
-val BottomNavigationList = listOf(
-    BottomNavigationData(
-        title = "Home",
-        icon = R.drawable.homeicon,
-        navigation = Homes
-    ),
-    BottomNavigationData(
-        title = "Cards",
-        icon = R.drawable.cardicon,
-        navigation = Cards
-    ),
-    BottomNavigationData(
-        title = "Pay",
-        icon = R.drawable.payicon,
-        navigation = Pay
-    ),
-    BottomNavigationData(
-        title = "Search",
-        icon = R.drawable.searchicon,
-        navigation = Search
-    ),
-    BottomNavigationData(
-        title = "History",
-        icon = R.drawable.historyicon,
-        navigation = History
-    )
-)
-
-
 @Composable
 fun BottomNavigation(navController: NavHostController) {
     NavigationBar(
@@ -77,7 +48,7 @@ fun BottomNavigation(navController: NavHostController) {
             NavigationBarItem(
 
 
-                    selected = navController.currentDestination
+                selected = navController.currentDestination
                     ?.hasRoute(screen.navigation::class) == true,
 
                 onClick = {
@@ -108,3 +79,32 @@ fun BottomNavigation(navController: NavHostController) {
         }
     }
 }
+
+
+val BottomNavigationList = listOf(
+    BottomNavigationData(
+        title = "Home",
+        icon = R.drawable.homeicon,
+        navigation = Homes
+    ),
+    BottomNavigationData(
+        title = "Cards",
+        icon = R.drawable.cardicon,
+        navigation = Cards
+    ),
+    BottomNavigationData(
+        title = "Pay",
+        icon = R.drawable.payicon,
+        navigation = Pay
+    ),
+    BottomNavigationData(
+        title = "Search",
+        icon = R.drawable.searchicon,
+        navigation = Search
+    ),
+    BottomNavigationData(
+        title = "History",
+        icon = R.drawable.historyicon,
+        navigation = History
+    )
+)
