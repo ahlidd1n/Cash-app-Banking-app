@@ -145,10 +145,10 @@ fun HomeScreen(
                                         .padding(5.dp)
                                 ) {
                                     Text(user.userInfo.fullName, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
-
                                     Box(
                                         modifier = Modifier
                                             .size(35.dp)
+                                            .clickable(onClick = {})
                                             .background(color = Color.Black, shape = CircleShape),
                                         contentAlignment = Alignment.Center
                                     ){
@@ -161,7 +161,10 @@ fun HomeScreen(
                                 Box(
                                     modifier = Modifier
                                         .padding(10.dp)
-                                        .background(color = Color.White, shape = RoundedCornerShape(16.dp))
+                                        .background(
+                                            color = Color.White,
+                                            shape = RoundedCornerShape(16.dp)
+                                        )
                                 ) {
                                     Column(
                                         modifier = Modifier
@@ -251,14 +254,18 @@ fun HomeScreen(
                                                             .size(width = 66.dp, height = 53.dp)
                                                             .clip(RoundedCornerShape(15.dp))
                                                             .background(
-                                                                color = if (isSelected) Color(0xFF00D45A) else Color(0xFFF5F5F5)
+                                                                color = if (isSelected) Color(
+                                                                    0xFF00D45A
+                                                                ) else Color(0xFFF5F5F5)
                                                             )
                                                             .clickable {
-                                                                if (number == "..."){
+                                                                if (number == "...") {
                                                                     navigateToAddCashScreen()
-                                                                }else{
+                                                                } else {
                                                                     selectedNumber = number
-                                                                    addCash = number.removePrefix("$").toInt()
+                                                                    addCash =
+                                                                        number.removePrefix("$")
+                                                                            .toInt()
                                                                 }
                                                             },
                                                         contentAlignment = Alignment.Center
@@ -320,7 +327,10 @@ fun HomeScreen(
                                             .width(160.dp)
                                             .height(195.dp)
                                             .clickable(onClick = {})
-                                            .background(color = Color.White, shape = RoundedCornerShape(16.dp))
+                                            .background(
+                                                color = Color.White,
+                                                shape = RoundedCornerShape(16.dp)
+                                            )
                                     ) {
                                         Column(
                                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -332,7 +342,12 @@ fun HomeScreen(
                                                 horizontalArrangement = Arrangement.SpaceBetween,
                                                 modifier = Modifier
                                                     .fillMaxWidth()
-                                                    .padding(start = 10.dp, end = 10.dp, top = 10.dp, bottom = 5.dp),
+                                                    .padding(
+                                                        start = 10.dp,
+                                                        end = 10.dp,
+                                                        top = 10.dp,
+                                                        bottom = 5.dp
+                                                    ),
                                             ) {
                                                 Text("Savings", fontWeight = FontWeight.Bold)
                                                 Text(">", color = Color.LightGray, fontWeight = FontWeight.Bold)
@@ -346,7 +361,7 @@ fun HomeScreen(
                                                     .padding(bottom = 10.dp)
                                             )
 
-                                            Text("$100000", fontSize = 25.sp, fontWeight = FontWeight.Bold)
+                                            Text("$${user.userInfo.savings}", fontSize = 25.sp, fontWeight = FontWeight.Bold)
 
                                             Spacer(Modifier.height(5.dp))
 
@@ -359,13 +374,21 @@ fun HomeScreen(
                                             .width(160.dp)
                                             .height(195.dp)
                                             .clickable(onClick = {})
-                                            .background(color = Color.White, shape = RoundedCornerShape(16.dp))
+                                            .background(
+                                                color = Color.White,
+                                                shape = RoundedCornerShape(16.dp)
+                                            )
                                     ) {
                                         Row(
                                             horizontalArrangement = Arrangement.SpaceBetween,
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .padding(start = 10.dp, end = 10.dp, top = 10.dp, bottom = 5.dp),
+                                                .padding(
+                                                    start = 10.dp,
+                                                    end = 10.dp,
+                                                    top = 10.dp,
+                                                    bottom = 5.dp
+                                                ),
                                         ) {
                                             Text("Buy bitcoin", fontWeight = FontWeight.Bold)
                                             Text(">", color = Color.LightGray, fontWeight = FontWeight.Bold)
@@ -392,13 +415,21 @@ fun HomeScreen(
                                             .width(160.dp)
                                             .height(195.dp)
                                             .clickable(onClick = {})
-                                            .background(color = Color.White, shape = RoundedCornerShape(16.dp))
+                                            .background(
+                                                color = Color.White,
+                                                shape = RoundedCornerShape(16.dp)
+                                            )
                                     ) {
                                         Row(
                                             horizontalArrangement = Arrangement.SpaceBetween,
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .padding(start = 10.dp, end = 10.dp, top = 10.dp, bottom = 25.dp),
+                                                .padding(
+                                                    start = 10.dp,
+                                                    end = 10.dp,
+                                                    top = 10.dp,
+                                                    bottom = 25.dp
+                                                ),
                                         ) {
                                             Text("Invest in\nstocks", fontWeight = FontWeight.Bold)
                                             Text(">", color = Color.LightGray, fontWeight = FontWeight.Bold)
@@ -431,7 +462,12 @@ fun HomeScreen(
                                             horizontalArrangement = Arrangement.SpaceBetween,
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .padding(start = 10.dp, end = 10.dp, top = 10.dp, bottom = 25.dp),
+                                                .padding(
+                                                    start = 10.dp,
+                                                    end = 10.dp,
+                                                    top = 10.dp,
+                                                    bottom = 25.dp
+                                                ),
                                         ) {
                                             Text("Free tax\nfilling", fontWeight = FontWeight.Bold)
                                             Text(">", color = Color.LightGray, fontWeight = FontWeight.Bold)
@@ -457,7 +493,10 @@ fun HomeScreen(
                                         .fillMaxSize()
                                         .height(170.dp)
                                         .clickable(onClick = {})
-                                        .background(color = Color.White, shape = RoundedCornerShape(16.dp))
+                                        .background(
+                                            color = Color.White,
+                                            shape = RoundedCornerShape(16.dp)
+                                        )
                                 ) {
                                     Column(
                                         verticalArrangement = Arrangement.Center,
@@ -470,7 +509,12 @@ fun HomeScreen(
                                             horizontalArrangement = Arrangement.SpaceBetween,
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .padding(start = 10.dp, end = 10.dp, top = 10.dp, bottom = 25.dp),
+                                                .padding(
+                                                    start = 10.dp,
+                                                    end = 10.dp,
+                                                    top = 10.dp,
+                                                    bottom = 25.dp
+                                                ),
                                         ) {
                                             Text("Build your credit", fontWeight = FontWeight.Bold)
                                             Text(">", color = Color.LightGray, fontWeight = FontWeight.Bold)

@@ -6,7 +6,8 @@ data class UserInfo(
     val phone: String = "0",
     val password: String = "******",
     val cardNumber: Int = 0,
-    val balance: Double = 0.00
+    val balance: Double = 0.00,
+    val savings: Double = 0.00
 )
 
 data class NewUser(
@@ -15,5 +16,6 @@ data class NewUser(
     val phone: String = "0",
     val password: String = "******",
     val cardNumber: Int = 0,
-    val balance: Double = 0.00
+    val balance: Double = 0.00,
+    val savings: Double = 0.00
 )
