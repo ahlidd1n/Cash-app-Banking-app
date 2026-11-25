@@ -87,7 +87,7 @@ fun SavingsScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(bgGradient)
-            .statusBarsPadding()
+
     ) {
         when (val currentState = state) {
             is UiState.Loading -> {

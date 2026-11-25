@@ -64,17 +64,17 @@ fun BottomNavigation(navController: NavHostController) {
                     }
                 },
 
+                colors = NavigationBarItemDefaults.colors(
+                    indicatorColor = Color(0xFFDCFCE7)
+                ),
+
                 icon = {
                     Icon(
                         painter = painterResource(screen.icon),
                         contentDescription = screen.title,
                         tint = if (isSelected) Color.Black else Color.LightGray
                     )
-                },
-
-                colors = NavigationBarItemDefaults.colors(
-
-                )
+                }
             )
         }
     }

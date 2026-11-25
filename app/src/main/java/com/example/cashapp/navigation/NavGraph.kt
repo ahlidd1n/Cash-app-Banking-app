@@ -136,7 +136,12 @@ fun AppNavGraph(
 
 
         composable<Cards> {
-            MainCardScreen(navigation = { navController.navigate(Cards) })
+            MainCardScreen(
+                navigation = {
+                navController.navigate(Cards)
+            },
+                viewModel = userViewModel
+                )
         }
 
         composable<Pay> {
