@@ -18,15 +18,27 @@ import com.example.cashapp.screens.registration.LoginScreen
 import kotlinx.serialization.Serializable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.input.key.Key.Companion.Home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import com.example.cashapp.repository.UserRepository
 import com.example.cashapp.screens.HomeScreens.AddCash
+import com.example.cashapp.screens.ProfileScreen.InviteFriendsScreen
+import com.example.cashapp.screens.ProfileScreen.SettingScreens.DocumentsScreen
+import com.example.cashapp.screens.ProfileScreen.SettingScreens.FamilyScreen
+import com.example.cashapp.screens.ProfileScreen.SettingScreens.FavoritesScreen
+import com.example.cashapp.screens.ProfileScreen.SettingScreens.LanguageScreen
+import com.example.cashapp.screens.ProfileScreen.SettingScreens.LimitsScreen
+import com.example.cashapp.screens.ProfileScreen.SettingScreens.LinkedBanksScreen
+import com.example.cashapp.screens.ProfileScreen.SettingScreens.NotificationsScreen
+import com.example.cashapp.screens.ProfileScreen.SettingScreens.PersonalScreen
+import com.example.cashapp.screens.ProfileScreen.SettingScreens.SecurityPrivacyScreen
+import com.example.cashapp.screens.ProfileScreen.SettingScreens.SupportScreen
+import com.example.cashapp.screens.ProfileScreen.YourAccountScreen
 import com.example.cashapp.screens.SavingsScreen.SavingsScreen
 import com.example.cashapp.viewmodel.OnBoardingViewModel
 import com.example.cashapp.viewmodel.OnBoardingViewModelFactory
+import com.example.cashapp.viewmodel.UiState
 import com.example.cashapp.viewmodel.UserViewModel
 
 @Composable
@@ -113,6 +125,9 @@ fun AppNavGraph(
                 },
                 navigateToSavingScreen = {
                     navController.navigate(SavingScreen)
+                },
+                navigateToProfileScreen = {
+                    navController.navigate(ProfileScreen)
                 }
             )
         }
@@ -145,7 +160,18 @@ fun AppNavGraph(
         }
 
         composable<Pay> {
-            MainPayScreen(navigation = { navController.navigate(Pay) })
+            LaunchedEffect(Unit) {
+                if (userViewModel.uiState.value is UiState.Loading) {
+                    userViewModel.loadCurrentUser()
+                }
+            }
+            MainPayScreen(
+                viewModel = userViewModel,
+                navigation = {navController.navigate(Pay)},
+                onAddMoneyClick = { navController.navigate(AddCashScreen) },
+                onSaveClick = { navController.navigate(SavingScreen) },
+                onCardClick = { navController.navigate(Cards) }
+            )
         }
 
         composable<Search> {
@@ -155,6 +181,89 @@ fun AppNavGraph(
         composable<History> {
             MainHistoryScreen(navigation = { navController.navigate(History) })
         }
+
+        composable <ProfileScreen>{
+            LaunchedEffect(Unit) {
+                if (userViewModel.uiState.value is UiState.Loading) {
+                    userViewModel.loadCurrentUser()
+                }
+            }
+            YourAccountScreen(
+                viewModel = userViewModel,
+                onCloseClick = {navController.popBackStack()},
+                onInviteFriendsClick = {navController.navigate(InviteFriendsScreen)},
+                goToSupport = {navController.navigate(SupportScreen)},
+                goToDocuments = {navController.navigate(DocumentsScreen)},
+                goToLimits = {navController.navigate(LimitsScreen)},
+                goToFamily = {navController.navigate(FamilyScreen)},
+                goTOSecurity = {navController.navigate(SecurityPrivacyScreen)},
+                goTOLinkedBanks = {navController.navigate(LinkedBanksScreen)},
+                goToFavorites = {navController.navigate(FavoritesScreen)},
+                goToNotification = {navController.navigate(NotificationScreen)},
+                goToPersonal = {navController.navigate(PersonalScreen)},
+                goToLanguage = {navController.navigate(LanguageScreen)}
+            )
+        }
+
+
+        //Setting Screens
+        composable <SupportScreen>{
+            SupportScreen(onBackClick = { navController.popBackStack() })
+        }
+
+        composable<DocumentsScreen> {
+            DocumentsScreen(onBackClick = { navController.popBackStack() })
+        }
+
+        composable<LimitsScreen>{
+            LimitsScreen(
+                viewModel = userViewModel,
+                onBackClick = { navController.popBackStack() })
+        }
+        composable <FamilyScreen>{
+            FamilyScreen(onBackClick = { navController.popBackStack() })
+        }
+        composable <SecurityPrivacyScreen>{
+            SecurityPrivacyScreen(onBackClick = { navController.popBackStack() })
+        }
+        composable <LinkedBanksScreen>{
+            LinkedBanksScreen(onBackClick = {navController.popBackStack()})
+        }
+
+        composable<FavoritesScreen> {
+            FavoritesScreen(
+                viewModel = userViewModel,
+                onBackClick = { navController.popBackStack() },
+                onNavigateToSavings = { navController.navigate(SavingScreen) },
+                onNavigateToCard = { navController.navigate(Cards) },
+                onNavigateToLimits = { navController.navigate(LimitsScreen) }
+            )
+        }
+
+        composable<NotificationScreen> {
+            NotificationsScreen(
+                viewModel = userViewModel,
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable<PersonalScreen> {
+            PersonalScreen(
+                viewModel = userViewModel,
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+        composable<LanguageScreen> {
+            LanguageScreen(onBackClick = { navController.popBackStack() })
+        }
+
+        composable<InviteFriendsScreen> {
+            InviteFriendsScreen(
+                viewModel = userViewModel,
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
     }
 }
 
@@ -185,3 +294,31 @@ object History
 object AddCashScreen
 @Serializable
 object SavingScreen
+@Serializable
+object ProfileScreen
+
+
+//Setting Screens
+@Serializable
+object SupportScreen
+@Serializable
+object DocumentsScreen
+
+@Serializable
+object LimitsScreen
+@Serializable
+object FamilyScreen
+@Serializable
+object SecurityPrivacyScreen
+@Serializable
+object LinkedBanksScreen
+@Serializable
+object FavoritesScreen
+@Serializable
+object NotificationScreen
+@Serializable
+object PersonalScreen
+@Serializable
+object LanguageScreen
+@Serializable
+object InviteFriendsScreen

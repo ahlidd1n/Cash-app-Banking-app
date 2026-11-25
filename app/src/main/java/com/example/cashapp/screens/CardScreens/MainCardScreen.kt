@@ -111,12 +111,15 @@ fun MainCardScreen(
 
             is UiState.Success -> {
                 val user = currentState.userInfo
-                val rawCard = user.cardNumber.toString()
+                val prefix = "11112222"
+                val apiCard = user.cardNumber.toString()
+                val fullCard = prefix + apiCard
+
                 val displayCardNumber = if (hideDetails) {
-                    val lastFour = rawCard.takeLast(4).padStart(4, '0')
+                    val lastFour = fullCard.takeLast(4).padStart(4, '0')
                     "••••  ••••  ••••  $lastFour"
                 } else {
-                    rawCard.chunked(4).joinToString(" ")
+                    fullCard.chunked(4).joinToString(" ")
                 }
 
                 val initials = user.fullName
@@ -253,7 +256,7 @@ fun MainCardScreen(
                                 )
                             }
 
-                            // Bottom row: Cardholder, Valid Thru, DEBIT / VISA
+                            // Bottom row: Cardholder, Valid , DEBIT / VISA
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,

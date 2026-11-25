@@ -1,6 +1,5 @@
 package com.example.cashapp.screens.HomeScreens
 
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,14 +20,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.ArrowUpward
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -43,18 +45,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import com.example.cashapp.viewmodel.UiState
 import com.example.cashapp.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
-import java.nio.file.WatchEvent
-
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,499 +64,510 @@ fun HomeScreen(
     navigation: () -> Unit = {},
     viewModel: UserViewModel = viewModel(),
     navigateToAddCashScreen: () -> Unit = {},
-    navigateToSavingScreen: () -> Unit = {}
+    navigateToSavingScreen: () -> Unit = {},
+    navigateToProfileScreen: () -> Unit = {},
+    onBitcoinClick: () -> Unit = {},
+    onStocksClick: () -> Unit = {},
+    onTaxClick: () -> Unit = {},
+    onCreditClick: () -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsState()
-    var bottomSheet by remember{ mutableStateOf(false) }
+    var bottomSheet by remember { mutableStateOf(false) }
     val snackBar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
+    val bgGradient = Brush.verticalGradient(
+        colors = listOf(
+            Color(0xFFF2F6EC),
+            Color(0xFFF6F6F4),
+            Color(0xFFF2F2F2)
+        )
+    )
 
     Scaffold(
+        containerColor = Color.Transparent,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         snackbarHost = {
-            Box(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                SnackbarHost(
-                    hostState = snackBar,
-                    modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .fillMaxWidth()
-                        .statusBarsPadding()
-                        .padding(horizontal = 12.dp, vertical = 8.dp)
-                ) { data ->
+            CashAppSnackbarHost(
+                hostState = snackBar,
+                modifier = Modifier.statusBarsPadding()
+            )
+        }
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(bgGradient)
+                .padding(paddingValues)
+        ) {
+            when (val currentState = state) {
+                is UiState.Loading -> {
+                    CircularProgressIndicator(
+                        color = Color(0xFF16A34A),
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
 
+                is UiState.Error -> {
                     Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        color = Color(0xFFFF0000),
-                        contentColor = Color.White,
-                        shape = RoundedCornerShape(16.dp),
-                        shadowElevation = 6.dp
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(16.dp),
+                        shape = RoundedCornerShape(18.dp),
+                        color = Color.White,
+                        shadowElevation = 2.dp
                     ) {
                         Text(
-                            text = data.visuals.message,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White,
+                            text = "Error: ${currentState.errorMassage}",
+                            color = Color(0xFFB91C1C),
+                            fontWeight = FontWeight.SemiBold,
                             modifier = Modifier.padding(16.dp)
                         )
                     }
                 }
-            }
-        }
-    ) {paddingValues ->
-        Column(
-            modifier = Modifier.padding(paddingValues)
-        ) {
 
-            Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                when (val user = state) {
+                is UiState.Success -> {
+                    val user = currentState.userInfo
+                    val initials = user.fullName
+                        .trim()
+                        .split(" ")
+                        .filter { it.isNotBlank() }
+                        .take(2)
+                        .joinToString("") { it.first().uppercase() }
+                        .ifBlank { "U" }
 
-                    is UiState.Loading -> {
-                        CircularProgressIndicator()
-                    }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                            .padding(horizontal = 16.dp, vertical = 12.dp)
+                    ) {
+                        // Top Header
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column {
+                                Text(
+                                    text = "CASH APP",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    letterSpacing = 1.sp,
+                                    color = Color(0xFF6B7280)
+                                )
+                                Text(
+                                    text = user.fullName,
+                                    fontSize = 24.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = Color(0xFF111827),
+                                    letterSpacing = (-0.5).sp
+                                )
+                            }
 
-                    is UiState.Error -> {
-                        Text("Error: ${user.errorMassage}")
-                    }
+                            Box(
+                                modifier = Modifier
+                                    .size(44.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFF18191B))
+                                    .clickable(onClick = navigateToProfileScreen),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = initials,
+                                    color = Color.White,
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
 
-                    is UiState.Success -> {
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(color = Color(0xFFF5F5F5))
+                        // Cash Balance Card
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(24.dp),
+                            color = Color.White,
+                            shadowElevation = 2.dp
                         ) {
                             Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(end = 10.dp, start = 10.dp)
-                                    .verticalScroll(rememberScrollState())
+                                modifier = Modifier.padding(20.dp)
                             ) {
-
                                 Row(
+                                    modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(5.dp)
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text(user.userInfo.fullName, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
-                                    Box(
-                                        modifier = Modifier
-                                            .size(35.dp)
-                                            .clickable(onClick = {})
-                                            .background(color = Color.Black, shape = CircleShape),
-                                        contentAlignment = Alignment.Center
-                                    ){
-                                        Text("${user.userInfo.fullName.first()}", color = Color.White, fontSize = 20.sp)
-                                    }
+                                    Text(
+                                        text = "Cash Balance",
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFF111827)
+                                    )
+                                    Text(
+                                        text = "Account & Routing",
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = Color(0xFF6B7280)
+                                    )
                                 }
 
                                 Spacer(modifier = Modifier.height(10.dp))
 
-                                Box(
-                                    modifier = Modifier
-                                        .padding(10.dp)
-                                        .background(
-                                            color = Color.White,
-                                            shape = RoundedCornerShape(16.dp)
-                                        )
+                                Text(
+                                    text = "$${String.format(Locale.US, "%.2f", user.balance)}",
+                                    fontSize = 36.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = Color(0xFF111827),
+                                    letterSpacing = (-0.8).sp
+                                )
+
+                                Spacer(modifier = Modifier.height(22.dp))
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                                 ) {
-                                    Column(
-                                        modifier = Modifier
-                                            .padding(10.dp)
-                                    ) {
-                                        Row(
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(5.dp)
-                                        ) {
-                                            Text("Clash Balance", fontSize = 14.sp, color = Color.Black, fontWeight = FontWeight.Bold)
-                                            Text("Account & Routing", fontSize = 14.sp, color = Color.LightGray, fontWeight = FontWeight.Bold)
-                                        }
-
-                                        Spacer(modifier = Modifier.height(10.dp))
-
-                                        Text("$${user.userInfo.balance}", fontSize = 35.sp, fontWeight = FontWeight.ExtraBold)
-
-                                        Spacer(modifier = Modifier.height(35.dp))
-
-                                        Row(
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(start = 15.dp, end = 15.dp)
-                                        ) {
-                                            Button(
-                                                onClick = {bottomSheet = true},
-                                                colors = ButtonDefaults.buttonColors(
-                                                    containerColor = Color(0xFFF5F5F5)
-                                                )
-                                            ) {
-                                                Text("Add Cash", color = Color.Black, fontWeight = FontWeight.Bold)
+                                    BalanceActionPill(
+                                        title = "Add Cash",
+                                        icon = Icons.Outlined.Add,
+                                        onClick = { bottomSheet = true },
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    BalanceActionPill(
+                                        title = "Cash Out",
+                                        icon = Icons.Outlined.ArrowUpward,
+                                        onClick = {
+                                            scope.launch {
+                                                snackBar.showSnackbar("Cash Out coming soon")
                                             }
-
-                                            Button(
-                                                onClick = {},
-                                                colors = ButtonDefaults.buttonColors(
-                                                    containerColor = Color(0xFFF5F5F5)
-                                                )
-                                            ) {
-                                                Text("Cash Out", color = Color.Black, fontWeight = FontWeight.Bold)
-                                            }
-                                        }
-                                    }
-                                }
-
-
-
-
-                                if (bottomSheet){
-                                    ModalBottomSheet(
-                                        onDismissRequest = {
-                                            bottomSheet = false
                                         },
-                                        containerColor = Color.White
-                                    ) {
-
-                                        val numbers = listOf("$1", "$10", "$20", "$50", "$100", "...")
-                                        var selectedNumber by remember { mutableStateOf<String?>(null) }
-                                        var addCash by rememberSaveable { mutableStateOf(0.00) }
-
-
-                                        Column(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(10.dp),
-                                            horizontalAlignment = Alignment.CenterHorizontally
-                                        ) {
-                                            Text("Add Cash", fontSize = 25.sp, fontWeight = FontWeight.Bold)
-
-                                            Spacer(Modifier.height(15.dp))
-
-                                            Text("$$addCash", fontSize = 40.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF00D45A))
-
-                                            FlowRow(
-                                                maxItemsInEachRow = 3,
-                                                horizontalArrangement = Arrangement.spacedBy(17.dp),
-                                                verticalArrangement = Arrangement.spacedBy(17.dp),
-                                                modifier = Modifier.padding(top = 25.dp)
-                                            ) {
-                                                numbers.forEach { number ->
-                                                    val isSelected = selectedNumber == number
-                                                    Box(
-                                                        modifier = Modifier
-                                                            .size(width = 66.dp, height = 53.dp)
-                                                            .clip(RoundedCornerShape(15.dp))
-                                                            .background(
-                                                                color = if (isSelected) Color(
-                                                                    0xFF00D45A
-                                                                ) else Color(0xFFF5F5F5)
-                                                            )
-                                                            .clickable {
-                                                                if (number == "...") {
-                                                                    navigateToAddCashScreen()
-                                                                } else {
-                                                                    selectedNumber = number
-                                                                    addCash =
-                                                                        number.removePrefix("$")
-                                                                            .toDouble()
-                                                                }
-                                                            },
-                                                        contentAlignment = Alignment.Center
-                                                    ) {
-                                                        Text(
-                                                            text = number,
-                                                            fontSize = 16.sp,
-                                                            fontWeight = FontWeight.Bold,
-                                                            color = if (isSelected) Color.White else Color.Black
-                                                        )
-                                                    }
-                                                }
-                                            }
-
-                                            Spacer(modifier = Modifier.height(52.dp))
-
-                                            Button(
-                                                onClick = {
-                                                    if (addCash == 0.00){
-                                                        scope.launch {
-                                                            snackBar.showSnackbar(message = "Select some amount !")
-                                                        }
-                                                    }else{
-                                                        viewModel.addBalance(addCash)
-                                                        addCash = 0.00
-                                                        bottomSheet = false
-                                                    }
-                                                },
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .height(48.dp),
-                                                colors = ButtonDefaults.buttonColors(
-                                                    containerColor = Color(0xFF00D45A)
-                                                ),
-                                                shape = RoundedCornerShape(30.dp)
-                                            ) {
-                                                Text(
-                                                    "Add",
-                                                    fontSize = 16.sp,
-                                                    fontWeight = FontWeight.Bold
-                                                )
-                                            }
-                                        }
-                                    }
+                                        modifier = Modifier.weight(1f)
+                                    )
                                 }
-
-
-
-
-
-
-
-                                FlowRow(
-                                    maxItemsInEachRow = 2,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(10.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(15.dp),
-                                    verticalArrangement = Arrangement.spacedBy(15.dp)
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .width(160.dp)
-                                            .height(195.dp)
-                                            .clickable(onClick = navigateToSavingScreen)
-                                            .background(
-                                                color = Color.White,
-                                                shape = RoundedCornerShape(16.dp)
-                                            )
-                                    ) {
-                                        Column(
-                                            horizontalAlignment = Alignment.CenterHorizontally,
-                                            verticalArrangement = Arrangement.Center,
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                        ) {
-                                            Row(
-                                                horizontalArrangement = Arrangement.SpaceBetween,
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .padding(
-                                                        start = 10.dp,
-                                                        end = 10.dp,
-                                                        top = 10.dp,
-                                                        bottom = 5.dp
-                                                    ),
-                                            ) {
-                                                Text("Savings", fontWeight = FontWeight.Bold)
-                                                Text(">", color = Color.LightGray, fontWeight = FontWeight.Bold)
-                                            }
-                                            AsyncImage(
-                                                model = "https://github.com/user-attachments/assets/9f406684-7c98-43f3-87d9-5e56f4f36435",
-                                                contentDescription = "Savings",
-                                                modifier = Modifier
-                                                    .width(80.dp)
-                                                    .height(80.dp)
-                                                    .padding(bottom = 10.dp)
-                                            )
-
-                                            Text("$${user.userInfo.savings}", fontSize = 25.sp, fontWeight = FontWeight.Bold)
-
-                                            Spacer(Modifier.height(5.dp))
-
-                                            Text("Save for a goal", color = Color.LightGray, fontWeight = FontWeight.Bold)
-                                        }
-                                    }
-
-                                    Box(
-                                        modifier = Modifier
-                                            .width(160.dp)
-                                            .height(195.dp)
-                                            .clickable(onClick = {})
-                                            .background(
-                                                color = Color.White,
-                                                shape = RoundedCornerShape(16.dp)
-                                            )
-                                    ) {
-                                        Row(
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(
-                                                    start = 10.dp,
-                                                    end = 10.dp,
-                                                    top = 10.dp,
-                                                    bottom = 5.dp
-                                                ),
-                                        ) {
-                                            Text("Buy bitcoin", fontWeight = FontWeight.Bold)
-                                            Text(">", color = Color.LightGray, fontWeight = FontWeight.Bold)
-                                        }
-                                        Column(
-                                            horizontalAlignment = Alignment.CenterHorizontally,
-                                            verticalArrangement = Arrangement.Bottom,
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                        ) {
-                                            AsyncImage(
-                                                model = "https://github.com/user-attachments/assets/ac131a79-a6c7-4e53-b0b5-984a629c8cb6",
-                                                contentDescription = "Bitcoin",
-                                                modifier = Modifier
-                                                    .width(130.dp)
-                                                    .height(130.dp)
-                                                    .padding(bottom = 10.dp)
-                                            )
-                                        }
-                                    }
-
-                                    Box(
-                                        modifier = Modifier
-                                            .width(160.dp)
-                                            .height(195.dp)
-                                            .clickable(onClick = {})
-                                            .background(
-                                                color = Color.White,
-                                                shape = RoundedCornerShape(16.dp)
-                                            )
-                                    ) {
-                                        Row(
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(
-                                                    start = 10.dp,
-                                                    end = 10.dp,
-                                                    top = 10.dp,
-                                                    bottom = 25.dp
-                                                ),
-                                        ) {
-                                            Text("Invest in\nstocks", fontWeight = FontWeight.Bold)
-                                            Text(">", color = Color.LightGray, fontWeight = FontWeight.Bold)
-                                        }
-                                        Column(
-                                            horizontalAlignment = Alignment.CenterHorizontally,
-                                            verticalArrangement = Arrangement.Bottom,
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                        ) {
-                                            AsyncImage(
-                                                model = "https://github.com/user-attachments/assets/dd1a83e4-7b39-4fcc-a1d2-db727ce7408a",
-                                                contentDescription = "Stocks",
-                                                modifier = Modifier
-                                                    .width(150.dp)
-                                                    .height(180.dp)
-                                                    .padding(bottom = 10.dp)
-                                            )
-                                        }
-                                    }
-
-                                    Box(
-                                        modifier = Modifier
-                                            .width(160.dp)
-                                            .height(195.dp)
-                                            .clickable(onClick = {})
-                                            .background(Color.White, RoundedCornerShape(16.dp))
-                                    ) {
-                                        Row(
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(
-                                                    start = 10.dp,
-                                                    end = 10.dp,
-                                                    top = 10.dp,
-                                                    bottom = 25.dp
-                                                ),
-                                        ) {
-                                            Text("Free tax\nfilling", fontWeight = FontWeight.Bold)
-                                            Text(">", color = Color.LightGray, fontWeight = FontWeight.Bold)
-                                        }
-
-                                        AsyncImage(
-                                            model = "https://github.com/user-attachments/assets/46882ab5-bfd1-425c-850a-6e0199286f62",
-                                            contentDescription = "Tax",
-                                            modifier = Modifier
-                                                .width(150.dp)
-                                                .height(100.dp)
-                                                .align(Alignment.BottomCenter)
-                                        )
-                                    }
-
-
-                                }
-
-                                Spacer(Modifier.height(5.dp))
-
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .height(170.dp)
-                                        .clickable(onClick = {})
-                                        .background(
-                                            color = Color.White,
-                                            shape = RoundedCornerShape(16.dp)
-                                        )
-                                ) {
-                                    Column(
-                                        verticalArrangement = Arrangement.Center,
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                    ) {
-
-                                        Row(
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(
-                                                    start = 10.dp,
-                                                    end = 10.dp,
-                                                    top = 10.dp,
-                                                    bottom = 25.dp
-                                                ),
-                                        ) {
-                                            Text("Build your credit", fontWeight = FontWeight.Bold)
-                                            Text(">", color = Color.LightGray, fontWeight = FontWeight.Bold)
-                                        }
-
-                                        Row(
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(10.dp)
-                                        ) {
-                                            Text("Track and grow\nyour score", fontWeight = FontWeight.Bold)
-
-                                            AsyncImage(
-                                                model = "https://github.com/user-attachments/assets/9c2e2aa0-1280-41dd-82c7-48e95e924d86",
-                                                contentDescription = "Tax",
-                                                modifier = Modifier
-                                                    .width(250.dp)
-                                                    .height(200.dp)
-                                            )
-                                        }
-                                    }
-                                }
-
-                                Spacer(Modifier.height(15.dp))
-
                             }
                         }
 
+                        Spacer(modifier = Modifier.height(14.dp))
+
+                        // Row 1: Savings & Buy Bitcoin
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            FeatureGridCard(
+                                title = "Savings",
+                                valueText = "$${String.format(Locale.US, "%.2f", user.savings)}",
+                                subtitle = "Save for a goal",
+                                imageUrl = "https://github.com/user-attachments/assets/9f406684-7c98-43f3-87d9-5e56f4f36435",
+                                imageSize = 76,
+                                onClick = navigateToSavingScreen,
+                                modifier = Modifier.weight(1f)
+                            )
+
+                            FeatureGridCard(
+                                title = "Buy bitcoin",
+                                valueText = null,
+                                subtitle = "Invest anytime",
+                                imageUrl = "https://github.com/user-attachments/assets/ac131a79-a6c7-4e53-b0b5-984a629c8cb6",
+                                imageSize = 96,
+                                onClick = onBitcoinClick,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        // Row 2: Invest in stocks & Free tax filing
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            FeatureGridCard(
+                                title = "Invest in stocks",
+                                valueText = null,
+                                subtitle = "Top companies",
+                                imageUrl = "https://github.com/user-attachments/assets/dd1a83e4-7b39-4fcc-a1d2-db727ce7408a",
+                                imageSize = 96,
+                                onClick = onStocksClick,
+                                modifier = Modifier.weight(1f)
+                            )
+
+                            FeatureGridCard(
+                                title = "Free tax filing",
+                                valueText = null,
+                                subtitle = "Simple & fast",
+                                imageUrl = "https://github.com/user-attachments/assets/46882ab5-bfd1-425c-850a-6e0199286f62",
+                                imageSize = 90,
+                                onClick = onTaxClick,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(14.dp))
+
+                        // Credit Card Banner
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(24.dp))
+                                .clickable(onClick = onCreditClick),
+                            shape = RoundedCornerShape(24.dp),
+                            color = Color.White,
+                            shadowElevation = 2.dp
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(18.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "Build your credit",
+                                        fontSize = 17.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = Color(0xFF111827)
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = "Track and grow your score",
+                                        fontSize = 13.sp,
+                                        color = Color(0xFF6B7280)
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.width(12.dp))
+
+                                AsyncImage(
+                                    model = "https://github.com/user-attachments/assets/9c2e2aa0-1280-41dd-82c7-48e95e924d86",
+                                    contentDescription = "Build your credit",
+                                    modifier = Modifier.size(92.dp)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(20.dp))
                     }
 
+                    // Add Cash Bottom Sheet
+                    if (bottomSheet) {
+                        val numbers = listOf("$1", "$10", "$20", "$50", "$100", "...")
+                        var selectedNumber by remember { mutableStateOf<String?>(null) }
+                        var addCash by rememberSaveable { mutableStateOf(0.00) }
 
+                        ModalBottomSheet(
+                            onDismissRequest = { bottomSheet = false },
+                            containerColor = Color.White,
+                            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 20.dp, vertical = 8.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = "Add Cash",
+                                    fontSize = 24.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = Color(0xFF111827)
+                                )
+
+                                Spacer(modifier = Modifier.height(12.dp))
+
+                                Text(
+                                    text = "$${String.format(Locale.US, "%.2f", addCash)}",
+                                    fontSize = 38.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = Color(0xFF00D45A)
+                                )
+
+                                FlowRow(
+                                    maxItemsInEachRow = 3,
+                                    horizontalArrangement = Arrangement.spacedBy(14.dp),
+                                    verticalArrangement = Arrangement.spacedBy(14.dp),
+                                    modifier = Modifier.padding(top = 22.dp)
+                                ) {
+                                    numbers.forEach { number ->
+                                        val isSelected = selectedNumber == number
+                                        Box(
+                                            modifier = Modifier
+                                                .size(width = 74.dp, height = 52.dp)
+                                                .clip(RoundedCornerShape(15.dp))
+                                                .background(
+                                                    color = if (isSelected) Color(0xFF00D45A)
+                                                    else Color(0xFFF3F4F6)
+                                                )
+                                                .clickable {
+                                                    if (number == "...") {
+                                                        bottomSheet = false
+                                                        navigateToAddCashScreen()
+                                                    } else {
+                                                        selectedNumber = number
+                                                        addCash = number.removePrefix("$").toDouble()
+                                                    }
+                                                },
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = number,
+                                                fontSize = 16.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = if (isSelected) Color.White else Color(0xFF111827)
+                                            )
+                                        }
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(28.dp))
+
+                                Button(
+                                    onClick = {
+                                        if (addCash == 0.00) {
+                                            scope.launch {
+                                                snackBar.showSnackbar("Select some amount !")
+                                            }
+                                        } else {
+                                            viewModel.addBalance(addCash)
+                                            addCash = 0.00
+                                            bottomSheet = false
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(52.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color(0xFF00D45A),
+                                        contentColor = Color.White
+                                    ),
+                                    shape = RoundedCornerShape(18.dp)
+                                ) {
+                                    Text(
+                                        text = "Add",
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(24.dp))
+                            }
+                        }
+                    }
                 }
-
             }
-
         }
     }
+}
 
+@Composable
+private fun BalanceActionPill(
+    title: String,
+    icon: ImageVector,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier
+            .height(46.dp)
+            .clip(RoundedCornerShape(15.dp))
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(15.dp),
+        color = Color(0xFFF3F4F6)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = title,
+                tint = Color(0xFF111827),
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = title,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF111827)
+            )
+        }
+    }
+}
+
+@Composable
+private fun FeatureGridCard(
+    title: String,
+    valueText: String?,
+    subtitle: String,
+    imageUrl: String,
+    imageSize: Int,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier
+            .height(205.dp)
+            .clip(RoundedCornerShape(22.dp))
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(22.dp),
+        color = Color.White,
+        shadowElevation = 2.dp
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(14.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Text(
+                    text = title,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF111827),
+                    modifier = Modifier.weight(1f)
+                )
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = Color(0xFF9CA3AF),
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+
+            AsyncImage(
+                model = imageUrl,
+                contentDescription = title,
+                modifier = Modifier.size(imageSize.dp)
+            )
+
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                if (valueText != null) {
+                    Text(
+                        text = valueText,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color(0xFF111827)
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                }
+                Text(
+                    text = subtitle,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(0xFF6B7280)
+                )
+            }
+        }
+    }
 }
